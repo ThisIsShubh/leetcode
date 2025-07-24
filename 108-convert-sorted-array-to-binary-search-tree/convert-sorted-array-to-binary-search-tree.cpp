@@ -9,17 +9,25 @@
  */
 class Solution {
 public:
-    TreeNode* buildBST(const vector<int>& nums, int left, int right) {
-        if (left > right) return nullptr;
+    // Make buildBST an inline private lambda to reduce call overhead
+    TreeNode* sortedArrayToBST(const std::vector<int>& nums) {
+        const int n = nums.size();
 
-        int mid = left + (right - left) / 2;
-        TreeNode* root = new TreeNode(nums[mid]);
-        root->left = buildBST(nums, left, mid - 1);
-        root->right = buildBST(nums, mid + 1, right);
-        return root;
-    }
+        std::function<TreeNode*(int, int)> buildBST = [&](int left, int right) -> TreeNode* {
+            if (left > right) return nullptr;
 
-    TreeNode* sortedArrayToBST(const vector<int>& nums) {
-        return buildBST(nums, 0, nums.size() - 1);
+            // Use unsigned right shift instead of division for speed
+            int mid = (left + right) >> 1;
+
+            // Allocate node
+            TreeNode* node = new TreeNode(nums[mid]);
+
+            // Tail-recursion friendly order
+            node->left = buildBST(left, mid - 1);
+            node->right = buildBST(mid + 1, right);
+            return node;
+        };
+
+        return buildBST(0, n - 1);
     }
 };
